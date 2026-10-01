@@ -8,7 +8,9 @@ implementation from `z-lab/dflash`.
 `v0.25.0` tag in `vllm-ascend`; the closest matching development branch is
 `releases/v0.25.1rc`, which is checked out in `vllm-workspace/vllm-ascend`.
 The two repositories must be installed from the same Python environment on a
-Linux Ascend host with a compatible CANN/torch-npu stack.
+Linux Ascend host with a compatible CANN/torch-npu stack.  A fresh clone
+contains the source trees as ordinary directories; it does not contain the
+three upstream repositories' `.git` metadata.
 
 The Ascend checkout contains compatibility gates for its `v0.25.1rc` API
 surface, so the exact vLLM 0.25.0 + Ascend combination still needs validation
@@ -20,14 +22,27 @@ The training reference follows the paper's reported setup: a five-layer draft,
 block size 16, 80K samples, six epochs, learning rate `6e-4`, and two
 reject-conditioned rounds.  The trainer is local-only: it expects a local
 target model, an existing local DFlash checkpoint, and a local DeepSpec target
-cache.  It does not download a dataset or model.  On the Ascend host, install the three local
-packages into one environment:
+cache.  It does not download a dataset or model.
+
+You cannot run training immediately after `git clone`: first prepare an NPU
+Python environment and place those three local inputs at the configured paths.
+For training alone, vLLM and vLLM-Ascend are not imported, so install the
+local DFlash package without resolving its GPU-oriented optional dependency
+pins:
 
 ```bash
-pip install -e vllm-workspace/vllm
-pip install -e vllm-workspace/vllm-ascend
-pip install -e vllm-workspace/dflash
+python -m pip install --no-deps -e ./vllm-workspace/dflash
+# The Ascend image normally already provides torch/torch-npu.  Ensure that
+# transformers and numpy are available in the same environment.
+python -m pip install "transformers==5.14.1" numpy
 ```
+
+Do not install all three local projects with plain `pip install -e`: their
+metadata currently requests different torch versions (vLLM 2.11, Ascend
+2.10, and DFlash's optional local extra 2.13).  Serving requires the exact
+vLLM/Ascend compatibility matrix of the target image and should be installed
+using the vLLM-Ascend installation guide with `--no-build-isolation` and
+`--no-deps` where appropriate, followed by `python -m pip check`.
 
 If the existing draft is plain DFlash, edit `DRAFT_PATH` and `OUTPUT_PATH` at
 the top of `training/convert_dflash_to_dflow.py`, then run the script without
