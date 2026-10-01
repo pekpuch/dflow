@@ -1,0 +1,41 @@
+# Nested repository metadata is preserved separately while this workspace is
+# uploaded as one repository.
+**/.git-nested-backup/
+
+# Local Python/build/runtime artifacts.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Downloaded model and dataset artifacts.
+**/.cache/
+**/huggingface/
+**/hf_cache/
+**/checkpoints/
+**/runs/
+**/outputs/
+**/datasets/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.gguf
+*.npy
+*.npz
+*.arrow
+*.parquet
+
+# Local logs and editor state.
+*.log
+.env
+.idea/
+.vscode/
